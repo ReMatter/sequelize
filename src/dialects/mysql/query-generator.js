@@ -239,6 +239,43 @@ export class MySqlQueryGenerator extends AbstractQueryGenerator {
     ]);
   }
 
+  _buildJsonObjectSql(tableName, attributes) {
+    return `json_object(${attributes.map(attr => `\`${attr}\`, (SELECT \`${tableName}\`.\`${attr}\` AS \`${attr}\`)`).join(', ')})`;
+  }
+
+  selectQuery(tableName, options, model) {
+    const { attributes, where, order } = options;
+
+    if (Array.isArray(attributes[0]) && attributes[0][1] === 'count') {
+      return `SELECT count(*) AS \`count\` FROM \`${tableName}\`;`;
+    }
+
+    // TODO move up as constant
+    const rootSelectSql = 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root`';
+
+    let orderBySql = '';
+    if (options.order) {
+      const orders = super.getQueryOrders(options, model);
+      if (orders.mainQueryOrder.length > 0) {
+        orderBySql = ` ORDER BY ${orders.mainQueryOrder.join(', ')}`;
+      }
+    }
+
+    return `
+      ${rootSelectSql}
+      FROM
+        (SELECT ${this._buildJsonObjectSql('_0_root.base', attributes)} AS \`root\`
+        FROM
+          (SELECT *
+          FROM \`${tableName}\`
+          ${super.whereQuery(where)}
+          ${orderBySql}
+          ${super.addLimitAndOffset(options, model)}
+          ) AS \`_0_root.base\`
+        ) AS \`_1_root\`;
+    `.replace(/\s\s+/g, ' ').trim();
+  }
+
   handleSequelizeMethod(smth, tableName, factory, options, prepend) {
     if (smth instanceof Utils.Json) {
       // Parse nested object
