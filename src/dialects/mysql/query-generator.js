@@ -240,18 +240,33 @@ export class MySqlQueryGenerator extends AbstractQueryGenerator {
   }
 
   _buildJsonObjectSql(tableName, attributes) {
-    return `json_object(${attributes.map(attr => `\`${attr}\`, (SELECT \`${tableName}\`.\`${attr}\` AS \`${attr}\`)`).join(', ')})`;
+    return `json_object(${attributes.map(attr => `'${attr}', (SELECT \`${tableName}\`.\`${attr}\` AS \`${attr}\`)`).join(', ')})`;
   }
 
   selectQuery(tableName, options, model) {
-    const { attributes, where, order } = options;
+    const { attributes, where } = options;
 
     if (Array.isArray(attributes[0]) && attributes[0][1] === 'count') {
       return `SELECT count(*) AS \`count\` FROM \`${tableName}\`;`;
     }
 
+    const mainTable = {
+      name: tableName,
+      quotedName: null,
+      as: null,
+      model,
+    };
+
     // TODO move up as constant
     const rootSelectSql = 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root`';
+
+    let groupBySql = '';
+    if (options.group) {
+      options.group = super.normalizeGrouping(model, mainTable, options);
+      if (options.group) {
+        groupBySql = ` GROUP BY ${options.group}`;
+      }
+    }
 
     let orderBySql = '';
     if (options.order) {
@@ -266,9 +281,10 @@ export class MySqlQueryGenerator extends AbstractQueryGenerator {
       FROM
         (SELECT ${this._buildJsonObjectSql('_0_root.base', attributes)} AS \`root\`
         FROM
-          (SELECT *
+          (SELECT ${groupBySql ? attributes.map(attr => `${attr} AS \`${attr}\``).join(', ') : '*'}
           FROM \`${tableName}\`
           ${super.whereQuery(where)}
+          ${groupBySql}
           ${orderBySql}
           ${super.addLimitAndOffset(options, model)}
           ) AS \`_0_root.base\`

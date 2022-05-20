@@ -211,23 +211,23 @@ if (dialect === 'mysql') {
       selectQuery: [
         {
           arguments: ['myTable', { attributes: ['id'] }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id', 'name'] }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`), `name`, (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`), \'name\', (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], where: { id: 2 } }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `id` = 2 ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `id` = 2 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], where: { name: 'foo' } }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `name` = \'foo\' ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `name` = \'foo\' ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], where: { name: 'foo\';DROP TABLE myTable;' } }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `name` = \'foo\\\';DROP TABLE myTable;\' ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `name` = \'foo\\\';DROP TABLE myTable;\' ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['foo', { attributes: [['count(*)', 'count']] }],
@@ -235,32 +235,32 @@ if (dialect === 'mysql') {
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], order: ['id'] }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `id` ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `id` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], order: ['id', 'DESC'] }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `id`, `DESC` ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `id`, `DESC` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], order: ['myTable.id'] }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], order: [['myTable.id', 'DESC']] }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` DESC ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` DESC ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           arguments: ['myTable', { attributes: ['id'], order: [['id', 'DESC']] }, function (sequelize) {
             return sequelize.define('myTable', {});
           }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` DESC ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` DESC ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
           arguments: ['myTable', { attributes: ['id'], order: [['id', 'DESC'], ['name']] }, function (sequelize) {
             return sequelize.define('myTable', {});
           }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` DESC, `myTable`.`name` ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY `myTable`.`id` DESC, `myTable`.`name` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
@@ -271,7 +271,7 @@ if (dialect === 'mysql') {
               order: [[sequelize.fn('f1', sequelize.fn('f2', sequelize.col('id'))), 'DESC']],
             };
           }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY f1(f2(`id`)) DESC ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY f1(f2(`id`)) DESC ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
@@ -285,7 +285,7 @@ if (dialect === 'mysql') {
               ],
             };
           }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY f1(`myTable`.`id`) DESC, f2(12, \'lalala\', \'2011-03-27 10:01:55\') ASC ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ORDER BY f1(`myTable`.`id`) DESC, f2(12, \'lalala\', \'2011-03-27 10:01:55\') ASC ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
@@ -299,7 +299,7 @@ if (dialect === 'mysql') {
               ),
             };
           }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE (LOWER(`user`.`name`) = \'jan\' AND `type` = 1) ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE (LOWER(`user`.`name`) = \'jan\' AND `type` = 1) ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
@@ -313,26 +313,28 @@ if (dialect === 'mysql') {
               ),
             };
           }],
-          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(`id`, (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE (LOWER(`user`.`name`) LIKE \'%t%\' AND `type` = 1) ) AS `_0_root.base` ) AS `_1_root`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE (LOWER(`user`.`name`) LIKE \'%t%\' AND `type` = 1) ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
           title: 'single string argument should be quoted',
-          arguments: ['myTable', { group: 'name' }],
-          expectation: 'SELECT * FROM `myTable` GROUP BY `name`;',
+          // a rather odd way to select distinct
+          arguments: ['myTable', { attributes: ['name'], group: 'name' }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'name\', (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT name AS `name` FROM `myTable` GROUP BY `name` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
-          arguments: ['myTable', { group: ['name'] }],
-          expectation: 'SELECT * FROM `myTable` GROUP BY `name`;',
+          arguments: ['myTable', { attributes: ['name'], group: ['name'] }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'name\', (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT name AS `name` FROM `myTable` GROUP BY `name` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'functions work for group by',
           arguments: ['myTable', function (sequelize) {
             return {
+              attributes: ['YEAR(createdAt)'],
               group: [sequelize.fn('YEAR', sequelize.col('createdAt'))],
             };
           }],
-          expectation: 'SELECT * FROM `myTable` GROUP BY YEAR(`createdAt`);',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'YEAR(createdAt)\', (SELECT `_0_root.base`.`YEAR(createdAt)` AS `YEAR(createdAt)`)) AS `root` FROM (SELECT YEAR(createdAt) AS `YEAR(createdAt)` FROM `myTable` GROUP BY YEAR(`createdAt`) ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {

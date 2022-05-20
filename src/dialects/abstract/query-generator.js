@@ -1397,7 +1397,7 @@ export class AbstractQueryGenerator {
 
     // Add GROUP BY to sub or main query
     if (options.group) {
-      options.group = Array.isArray(options.group) ? options.group.map(t => this.aliasGrouping(t, model, mainTable.as, options)).join(', ') : this.aliasGrouping(options.group, model, mainTable.as, options);
+      options.group = this.normalizeGrouping(model, mainTable, options);
 
       if (subQuery && options.group) {
         subQueryItems.push(` GROUP BY ${options.group}`);
@@ -1471,6 +1471,10 @@ export class AbstractQueryGenerator {
     }
 
     return `${query};`;
+  }
+
+  normalizeGrouping(model, mainTable, options) {
+    return Array.isArray(options.group) ? options.group.map(t => this.aliasGrouping(t, model, mainTable.as, options)).join(', ') : this.aliasGrouping(options.group, model, mainTable.as, options);
   }
 
   aliasGrouping(field, model, tableName, options) {
