@@ -341,15 +341,16 @@ if (dialect === 'mysql') {
           title: 'It is possible to mix sequelize.fn and string arguments to group by',
           arguments: ['myTable', function (sequelize) {
             return {
+              attributes: ['YEAR(createdAt)', 'title'],
               group: [sequelize.fn('YEAR', sequelize.col('createdAt')), 'title'],
             };
           }],
-          expectation: 'SELECT * FROM `myTable` GROUP BY YEAR(`createdAt`), `title`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'YEAR(createdAt)\', (SELECT `_0_root.base`.`YEAR(createdAt)` AS `YEAR(createdAt)`), \'title\', (SELECT `_0_root.base`.`title` AS `title`)) AS `root` FROM (SELECT YEAR(createdAt) AS `YEAR(createdAt)`, title AS `title` FROM `myTable` GROUP BY YEAR(`createdAt`), `title` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
-          arguments: ['myTable', { group: 'name', order: [['id', 'DESC']] }],
-          expectation: 'SELECT * FROM `myTable` GROUP BY `name` ORDER BY `id` DESC;',
+          arguments: ['myTable', { attributes: ['name'], group: 'name', order: [['id', 'DESC']] }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'name\', (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT name AS `name` FROM `myTable` GROUP BY `name` ORDER BY `id` DESC ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'HAVING clause works with where-like hash',
