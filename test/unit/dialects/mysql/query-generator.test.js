@@ -356,12 +356,12 @@ if (dialect === 'mysql') {
           title: 'HAVING clause works with where-like hash',
           arguments: ['myTable', function (sequelize) {
             return {
-              attributes: ['*', [sequelize.fn('YEAR', sequelize.col('createdAt')), 'creationYear']],
+              attributes: ['title', [sequelize.fn('YEAR', sequelize.col('createdAt')), 'creationYear']],
               group: ['creationYear', 'title'],
               having: { creationYear: { [Op.gt]: 2002 } },
             };
           }],
-          expectation: 'SELECT *, YEAR(`createdAt`) AS `creationYear` FROM `myTable` GROUP BY `creationYear`, `title` HAVING `creationYear` > 2002;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'title\', (SELECT `_0_root.base`.`title` AS `title`), \'creationYear\', (SELECT `_0_root.base`.`creationYear` AS `creationYear`)) AS `root` FROM (SELECT title AS `title`, YEAR(`createdAt`) AS `creationYear` FROM `myTable` GROUP BY `creationYear`, `title` HAVING `creationYear` > 2002 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {

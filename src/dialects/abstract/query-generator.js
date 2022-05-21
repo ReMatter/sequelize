@@ -1205,16 +1205,7 @@ export class AbstractQueryGenerator {
       options.includeAliases = new Map();
     }
 
-    // resolve table name options
-    if (options.tableAs) {
-      mainTable.as = this.quoteIdentifier(options.tableAs);
-    } else if (!Array.isArray(mainTable.name) && mainTable.model) {
-      mainTable.as = this.quoteIdentifier(mainTable.model.name);
-    }
-
-    mainTable.quotedName = !Array.isArray(mainTable.name) ? this.quoteTable(mainTable.name) : tableName.map(t => {
-      return Array.isArray(t) ? this.quoteTable(t[0], t[1]) : this.quoteTable(t, true);
-    }).join(', ');
+    this.resolveTableNameOptions(tableName, options, mainTable);
 
     if (subQuery && attributes.main) {
       for (const keyAtt of mainTable.model.primaryKeyAttributes) {
@@ -1471,6 +1462,18 @@ export class AbstractQueryGenerator {
     }
 
     return `${query};`;
+  }
+
+  resolveTableNameOptions(tableName, options, mainTable) {
+    if (options.tableAs) {
+      mainTable.as = this.quoteIdentifier(options.tableAs);
+    } else if (!Array.isArray(mainTable.name) && mainTable.model) {
+      mainTable.as = this.quoteIdentifier(mainTable.model.name);
+    }
+
+    mainTable.quotedName = !Array.isArray(mainTable.name) ? this.quoteTable(mainTable.name) : tableName.map(t => {
+      return Array.isArray(t) ? this.quoteTable(t[0], t[1]) : this.quoteTable(t, true);
+    }).join(', ');
   }
 
   normalizeGrouping(model, mainTable, options) {
