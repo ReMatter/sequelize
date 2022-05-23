@@ -368,113 +368,98 @@ if (dialect === 'mysql') {
           title: 'Combination of sequelize.fn, sequelize.col and { in: ... }',
           arguments: ['myTable', function (sequelize) {
             return {
+              attributes: ['id'],
               where: sequelize.and(
                 { archived: null },
                 sequelize.where(sequelize.fn('COALESCE', sequelize.col('place_type_codename'), sequelize.col('announcement_type_codename')), { [Op.in]: ['Lost', 'Found'] }),
               ),
             };
           }],
-          expectation: 'SELECT * FROM `myTable` WHERE (`myTable`.`archived` IS NULL AND COALESCE(`place_type_codename`, `announcement_type_codename`) IN (\'Lost\', \'Found\'));',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE (`archived` IS NULL AND COALESCE(`place_type_codename`, `announcement_type_codename`) IN (\'Lost\', \'Found\')) ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
-          arguments: ['myTable', { limit: 10 }],
-          expectation: 'SELECT * FROM `myTable` LIMIT 10;',
+          arguments: ['myTable', { attributes: ['id'], limit: 10 }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` LIMIT 10 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
-          arguments: ['myTable', { limit: 10, offset: 2 }],
-          expectation: 'SELECT * FROM `myTable` LIMIT 10 OFFSET 2;',
+          arguments: ['myTable', { attributes: ['id'], limit: 10, offset: 2 }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` LIMIT 10 OFFSET 2 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'uses default limit if only offset is specified',
-          arguments: ['myTable', { offset: 2 }],
-          expectation: 'SELECT * FROM `myTable` LIMIT 18446744073709551615 OFFSET 2;',
+          arguments: ['myTable', { attributes: ['id'], offset: 2 }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` LIMIT 18446744073709551615 OFFSET 2 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'uses limit 0',
-          arguments: ['myTable', { limit: 0 }],
-          expectation: 'SELECT * FROM `myTable` LIMIT 0;',
+          arguments: ['myTable', { attributes: ['id'], limit: 0 }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` LIMIT 0 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'uses offset 0',
-          arguments: ['myTable', { offset: 0 }],
-          expectation: 'SELECT * FROM `myTable`;',
+          arguments: ['myTable', { attributes: ['id'], offset: 0 }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'multiple where arguments',
-          arguments: ['myTable', { where: { boat: 'canoe', weather: 'cold' } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`boat` = \'canoe\' AND `myTable`.`weather` = \'cold\';',
+          arguments: ['myTable', { attributes: ['id'], where: { boat: 'canoe', weather: 'cold' } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `boat` = \'canoe\' AND `weather` = \'cold\' ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'no where arguments (object)',
-          arguments: ['myTable', { where: {} }],
-          expectation: 'SELECT * FROM `myTable`;',
-          context: QueryGenerator,
-        }, {
-          title: 'no where arguments (string)',
-          arguments: ['myTable', { where: [''] }],
-          expectation: 'SELECT * FROM `myTable` WHERE 1=1;',
+          arguments: ['myTable', { attributes: ['id'], where: {} }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'no where arguments (null)',
-          arguments: ['myTable', { where: null }],
-          expectation: 'SELECT * FROM `myTable`;',
+          arguments: ['myTable', { attributes: ['id'], where: null }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'buffer as where argument',
-          arguments: ['myTable', { where: { field: Buffer.from('Sequelize') } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` = X\'53657175656c697a65\';',
+          arguments: ['myTable', { attributes: ['id'], where: { field: Buffer.from('Sequelize') } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` = X\'53657175656c697a65\' ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'use != if ne !== null',
-          arguments: ['myTable', { where: { field: { [Op.ne]: 0 } } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` != 0;',
+          arguments: ['myTable', { attributes: ['id'], where: { field: { [Op.ne]: 0 } } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` != 0 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'use IS NOT if ne === null',
-          arguments: ['myTable', { where: { field: { [Op.ne]: null } } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` IS NOT NULL;',
+          arguments: ['myTable', { attributes: ['id'], where: { field: { [Op.ne]: null } } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` IS NOT NULL ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'use IS NOT if not === BOOLEAN',
-          arguments: ['myTable', { where: { field: { [Op.not]: true } } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` IS NOT true;',
+          arguments: ['myTable', { attributes: ['id'], where: { field: { [Op.not]: true } } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` IS NOT true ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'use != if not !== BOOLEAN',
-          arguments: ['myTable', { where: { field: { [Op.not]: 3 } } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` != 3;',
+          arguments: ['myTable', { attributes: ['id'], where: { field: { [Op.not]: 3 } } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` != 3 ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'Regular Expression in where clause',
-          arguments: ['myTable', { where: { field: { [Op.regexp]: '^[h|a|t]' } } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` REGEXP \'^[h|a|t]\';',
+          arguments: ['myTable', { attributes: ['id'], where: { field: { [Op.regexp]: '^[h|a|t]' } } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` REGEXP \'^[h|a|t]\' ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'Regular Expression negation in where clause',
-          arguments: ['myTable', { where: { field: { [Op.notRegexp]: '^[h|a|t]' } } }],
-          expectation: 'SELECT * FROM `myTable` WHERE `myTable`.`field` NOT REGEXP \'^[h|a|t]\';',
+          arguments: ['myTable', { attributes: ['id'], where: { field: { [Op.notRegexp]: '^[h|a|t]' } } }],
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` WHERE `field` NOT REGEXP \'^[h|a|t]\' ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         }, {
           title: 'Empty having',
           arguments: ['myTable', function () {
             return {
+              attributes: ['id'],
               having: {},
             };
           }],
-          expectation: 'SELECT * FROM `myTable`;',
-          context: QueryGenerator,
-          needsSequelize: true,
-        }, {
-          title: 'Having in subquery',
-          arguments: ['myTable', function () {
-            return {
-              subQuery: true,
-              tableAs: 'test',
-              having: { creationYear: { [Op.gt]: 2002 } },
-            };
-          }],
-          expectation: 'SELECT `test`.* FROM (SELECT * FROM `myTable` AS `test` HAVING `creationYear` > 2002) AS `test`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
           needsSequelize: true,
         }, {
@@ -487,7 +472,7 @@ if (dialect === 'mysql') {
               },
             },
           }],
-          expectation: 'SELECT `foo.bar.baz` FROM `myTable`;',
+          expectation: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'foo.bar.baz\', (SELECT `_0_root.base`.`foo.bar.baz` AS `foo.bar.baz`)) AS `root` FROM (SELECT * FROM `myTable` ) AS `_0_root.base` ) AS `_1_root`;',
           context: QueryGenerator,
         },
       ],
