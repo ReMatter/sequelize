@@ -252,6 +252,11 @@ export class MySqlQueryGenerator extends AbstractQueryGenerator {
   }
 
   selectQuery(tableName, options, model) {
+
+    if (!options?.json === true) {
+      return super.selectQuery(tableName, options, model);
+    }
+
     // TODO move up as constant
     const rootSelectSql = 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root`';
 
