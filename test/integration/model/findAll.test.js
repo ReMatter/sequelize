@@ -923,8 +923,8 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           }
         });
 
-        it.skip('should return DAO data when json is false', async function () {
-          const users = await this.User.findAll({ where: { username: 'barfooz' }, json: false, include: [this.Project] });
+        it('should return DAO data when json is not specified', async function () {
+          const users = await this.User.findAll({ where: { username: 'barfooz' }, include: [this.Project] });
           for (const user of users) {
             expect(user).to.be.instanceOf(this.User);
             expect(user.Projects[0]).to.be.instanceOf(this.Project);
