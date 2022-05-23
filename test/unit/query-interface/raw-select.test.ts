@@ -32,7 +32,6 @@ describe('QueryInterface#rawSelect', () => {
     expectsql(firstCall.args[0] as string, {
       default: `SELECT [id] FROM [Users] AS [User] WHERE [User].[username] = 'some :data';`,
       mssql: `SELECT [id] FROM [Users] AS [User] WHERE [User].[username] = N'some :data';`,
-      mysql: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'id\', (SELECT `_0_root.base`.`id` AS `id`)) AS `root` FROM (SELECT * FROM `Users` WHERE `username` = \'some :data\') AS `_0_root.base`) AS `_1_root`;',
     });
   });
 });

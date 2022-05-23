@@ -47,8 +47,6 @@ describe('QueryGenerator#selectQuery', () => {
     });
   });
 
-  // TODO add replacements for MySQL in JSON mode
-
   describe('replacements', () => {
     it('parses named replacements in literals', async () => {
       // The goal of this test is to test that :replacements are parsed in literals in as many places as possible

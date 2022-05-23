@@ -35,30 +35,26 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
 
     testsql({
       model: User,
-      attributes: ['name'],
       group: ['name'],
     }, {
-      default: 'SELECT `name` FROM `Users` AS `User` GROUP BY `name`;',
-      postgres: 'SELECT "name" FROM "Users" AS "User" GROUP BY "name";',
-      db2: 'SELECT "name" FROM "Users" AS "User" GROUP BY "name";',
-      ibmi: 'SELECT "name" FROM "Users" AS "User" GROUP BY "name"',
-      mssql: 'SELECT [name] FROM [Users] AS [User] GROUP BY [name];',
-      snowflake: 'SELECT "name" FROM "Users" AS "User" GROUP BY "name";',
-      mysql: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'name\', (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT name AS `name` FROM `Users` GROUP BY `name`) AS `_0_root.base`) AS `_1_root`;',
+      default: 'SELECT * FROM `Users` AS `User` GROUP BY `name`;',
+      postgres: 'SELECT * FROM "Users" AS "User" GROUP BY "name";',
+      db2: 'SELECT * FROM "Users" AS "User" GROUP BY "name";',
+      ibmi: 'SELECT * FROM "Users" AS "User" GROUP BY "name"',
+      mssql: 'SELECT * FROM [Users] AS [User] GROUP BY [name];',
+      snowflake: 'SELECT * FROM "Users" AS "User" GROUP BY "name";',
     });
 
     testsql({
       model: User,
-      attributes: ['name'],
       group: [],
     }, {
-      default: 'SELECT `name` FROM `Users` AS `User`;',
-      postgres: 'SELECT "name" FROM "Users" AS "User";',
-      db2: 'SELECT "name" FROM "Users" AS "User";',
-      ibmi: 'SELECT "name" FROM "Users" AS "User"',
-      mssql: 'SELECT [name] FROM [Users] AS [User];',
-      snowflake: 'SELECT "name" FROM "Users" AS "User";',
-      mysql: 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root` FROM (SELECT json_object(\'name\', (SELECT `_0_root.base`.`name` AS `name`)) AS `root` FROM (SELECT * FROM `Users` ) AS `_0_root.base`) AS `_1_root`;',
+      default: 'SELECT * FROM `Users` AS `User`;',
+      postgres: 'SELECT * FROM "Users" AS "User";',
+      db2: 'SELECT * FROM "Users" AS "User";',
+      ibmi: 'SELECT * FROM "Users" AS "User"',
+      mssql: 'SELECT * FROM [Users] AS [User];',
+      snowflake: 'SELECT * FROM "Users" AS "User";',
     });
   });
 });
