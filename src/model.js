@@ -1863,7 +1863,7 @@ class Model {
   }
 
   static async _findSeparate(results, options) {
-    if (!options.include || options.raw || !results) return results;
+    if (!options.include || options.raw || !results || options.json) return results;
 
     const original = results;
     if (options.plain) results = [results];

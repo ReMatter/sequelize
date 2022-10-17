@@ -849,6 +849,11 @@ export interface FindOptions<TAttributes = any>
   raw?: boolean;
 
   /**
+   * Skips model creation.
+   */
+   json?: boolean;
+
+  /**
    * Select group rows after groups and aggregates are computed.
    */
   having?: WhereOptions<any>;

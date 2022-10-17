@@ -304,10 +304,11 @@ class AbstractQuery {
         includeMap: this.options.includeMap,
         includeNames: this.options.includeNames
       }, {
-        checkExisting: this.options.hasMultiAssociation
+        checkExisting: this.options.hasMultiAssociation,
+        json: this.options.json
       });
 
-      result = this.model.bulkBuild(results, {
+      result = this.options.json === true ? results : this.model.bulkBuild(results, {
         isNewRecord: false,
         include: this.options.include,
         includeNames: this.options.includeNames,
@@ -318,7 +319,7 @@ class AbstractQuery {
       });
     // Regular queries
     } else {
-      result = this.model.bulkBuild(results, {
+      result = this.options.json === true ? results : this.model.bulkBuild(results, {
         isNewRecord: false,
         raw: true,
         attributes: this.options.originalAttributes || this.options.attributes
@@ -597,6 +598,38 @@ class AbstractQuery {
             $keyPrefix.forEach(buildIncludeMap);
           }
         }
+
+        // With this we can pass json: true to the find options and prevent sequelize
+        // from building the model from the result set.
+        // particularly in this case what we do is traverse the result from the database
+        // and look for entities that have its primary key set to null
+        // that means that the entity is not in the database so it should be removed from the result set.
+        // We are doing this for every property in the entity
+        // Maybe it could be optimized just doing it once for the whole entity.
+        if (options.json === true && $keyPrefix.length) {
+          let value = topValues;
+          for (const $keyPrefixSegment of $keyPrefix) {
+            value = value?.[$keyPrefixSegment];
+          }
+          if (value === null || value?.length === 0) {
+            continue;
+          }
+          const currIncludeMap = $keyPrefix
+            .reduce(
+              (acc, curr, i, arr) => arr.length - 1 === i ? acc[curr] : acc[curr]?.includeMap,
+              includeOptions.includeMap
+            );
+          const primaryKeyName = currIncludeMap.model.primaryKeyField;
+          if (!row[$keyPrefix.join('.').concat('.', primaryKeyName)]) {
+            if (currIncludeMap.association.isMultiAssociation) {
+              values[$keyPrefix.at(-1)] = [];
+            } else if (currIncludeMap.association.isSingleAssociation) {
+              values[$keyPrefix.at(-1)] = null;
+            }
+            continue;
+          }
+        }
+
         // End of key set
         if ($prevKeyPrefix !== undefined && $prevKeyPrefix !== $keyPrefix) {
           if (checkExisting) {

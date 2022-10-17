@@ -582,6 +582,34 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           expect(tasks[0].Worker.name).to.equal('worker');
         });
 
+        it('returns the associated worker via task.worker with json: true', async function() {
+          const tasks = await this.Task.findAll({
+            where: { title: 'homework' },
+            include: [this.Worker],
+            json: true
+          });
+
+          expect(tasks).to.exist;
+          tasks.forEach(task => expect(task).not.to.be.instanceOf(this.Task));
+          expect(tasks[0].Worker).to.exist;
+          expect(tasks[0].Worker).not.to.be.instanceOf(this.Worker);
+          expect(tasks[0].Worker.name).to.equal('worker');
+        });
+
+        it('returns undefined if no associated worker via task.worker with json: true', async function() {
+          await this.Task.create({ title: 'unnasigned' });
+
+          const tasks = await this.Task.findAll({
+            where: { title: 'unnasigned' },
+            include: [this.Worker],
+            json: true
+          });
+
+          expect(tasks).to.exist;
+          tasks.forEach(task => expect(task).not.to.be.instanceOf(this.Task));
+          expect(tasks[0].Worker).to.be.null;
+        });
+
         it('returns the associated worker via task.worker, using limit and sort', async function() {
           const tasks = await this.Task.findAll({
             where: { title: 'homework' },
@@ -627,6 +655,34 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           expect(workers).to.exist;
           expect(workers[0].TaskHasOne).to.exist;
           expect(workers[0].TaskHasOne.title).to.equal('homework');
+        });
+
+        it('returns the associated task via worker.task with json: true', async function() {
+          const workers = await this.Worker.findAll({
+            where: { name: 'worker' },
+            include: [this.Task],
+            json: true
+          });
+
+          expect(workers).to.exist;
+          workers.forEach(worker => expect(worker).to.not.be.instanceOf(this.Worker));
+          expect(workers[0].TaskHasOne).to.exist;
+          expect(workers[0].TaskHasOne).to.not.be.instanceOf(this.Task);
+          expect(workers[0].TaskHasOne.title).to.equal('homework');
+        });
+
+        it('returns undefined if no associated task via worker.task with json: true', async function() {
+          await this.Worker.create({ name: 'unassigned' });
+
+          const workers = await this.Worker.findAll({
+            where: { name: 'unassigned' },
+            include: [this.Task],
+            json: true
+          });
+
+          expect(workers).to.exist;
+          workers.forEach(worker => expect(worker).to.not.be.instanceOf(this.Worker));
+          expect(workers[0].TaskHasOne).to.be.null;
         });
       });
 
@@ -714,6 +770,35 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           expect(workers).to.exist;
           expect(workers[0].tasks).to.exist;
           expect(workers[0].tasks[0].title).to.equal('homework');
+        });
+
+        it('returns the associated tasks via worker.tasks with json: true', async function() {
+          const workers = await this.Worker.findAll({
+            where: { name: 'worker' },
+            include: [this.Task],
+            json: true
+          });
+
+          expect(workers).to.exist;
+          workers.forEach(worker => expect(worker).to.not.be.instanceOf(this.Worker));
+          expect(workers[0].tasks).to.exist;
+          workers[0].tasks.forEach(task => expect(task).to.not.be.instanceOf(this.Task));
+          expect(workers[0].tasks[0].title).to.equal('homework');
+        });
+
+
+        it('returns empty array if no associated tasks via worker.tasks with json: true', async function() {
+          await this.Worker.create({ name: 'no task' });
+
+          const workers = await this.Worker.findAll({
+            where: { name: 'no task' },
+            include: [this.Task],
+            json: true
+          });
+
+          expect(workers).to.exist;
+          workers.forEach(worker => expect(worker).to.not.be.instanceOf(this.Worker));
+          expect(workers[0].tasks.length).to.equal(0);
         });
 
         // https://github.com/sequelize/sequelize/issues/8739
@@ -996,6 +1081,38 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           expect(continents[0].countries[0].people).to.exist;
           expect(continents[0].countries[0].residents).to.exist;
           expect(continents[0].countries[0].continent).not.to.exist;
+        });
+
+        it('includes all nested associations with json: true', async function() {
+          const continents = await this.Continent.findAll({ include: [{ all: true, nested: true }], json: true });
+          expect(continents).to.exist;
+          expect(continents[0]).to.exist;
+          expect(continents[0].countries).to.exist;
+          expect(continents[0].countries[0]).to.exist;
+          expect(continents[0].countries[0].industries).to.exist;
+          expect(continents[0].countries[0].people).to.exist;
+          expect(continents[0].countries[0].residents).to.exist;
+          expect(continents[0].countries[0].continent).not.to.exist;
+        });
+
+        it('includes all nested associations and an empty array with json: true', async function() {
+          const r = await promiseProps({
+            artic: this.Continent.create({ name: 'Artic' }),
+            noland: this.Country.create({ name: 'NoLand' })
+          });
+
+          _.forEach(r, (item, itemName) => {
+            this[itemName] = item;
+          });
+
+          await this.noland.setContinent(this.artic);
+
+          const continents = await this.Continent.findAll({ where: { name: 'Artic' }, include: [{ all: true, nested: true }], json: true });
+          expect(continents).to.exist;
+          expect(continents[0]).to.exist;
+          expect(continents[0].countries).to.exist;
+          expect(continents[0].countries[0]).to.exist;
+          expect(continents[0].countries[0].people).to.have.length(0);
         });
       });
 
@@ -1358,6 +1475,14 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         expect(users.length).to.equal(1);
         expect(users[0].id).to.equal(this.users[1].id);
       });
+
+      it('can skip model creation if json: true is specified', async function() {
+        const users = await this.User.findAll({ where: { id: this.users[1].id }, json: true });
+        expect(users.length).to.equal(1);
+        expect(users[0].id).to.equal(this.users[1].id);
+        expect(users[0]).not.to.be.an.instanceof(this.User);
+      });
+
 
       it('sorts the results via id in ascending order', async function() {
         const users = await this.User.findAll();
