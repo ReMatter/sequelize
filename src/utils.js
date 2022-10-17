@@ -179,6 +179,42 @@ exports.mapFinderOptions = mapFinderOptions;
 function mapOptionFieldNames(options, Model) {
   if (Array.isArray(options.attributes)) {
     options.attributes = options.attributes.map(attr => {
+      /**
+       * This is necessary to create subqueries for computed fields on included models.
+       *
+       * Column({
+       *   type: DataTypes.VIRTUAL(DataTypes.NUMBER, (includeAs: string) => [
+       *     literal(`(SELECT SUM(prop) FROM other_model WHERE other_model.id = ${includeAs}.other_model_id)`),
+       *     'total',
+       *   ]),
+       * })
+       */
+      if (typeof attr === 'function') {
+        let as = options.as || Model.tableName;
+
+        let currentOptions = options;
+        while (currentOptions && currentOptions.parent && currentOptions.parent.parent) {
+          currentOptions = currentOptions.parent;
+
+          const parentAs = currentOptions.as;
+          as = `${parentAs}->${as}`;
+        }
+
+        const [virtualColumnLiteral, virtualColumnName] = attr(`\`${as}\``);
+        if (virtualColumnLiteral instanceof Fn) {
+          // TODO: Look into handleSequelizeMethod from query-generator to add the end comment: https://github.com/ReMatter/Universe/issues/5672
+          virtualColumnLiteral.fn = `/* start ${as}.${virtualColumnName} */${virtualColumnLiteral.fn}`;
+          return [virtualColumnLiteral, virtualColumnName];
+        }
+
+        // this code is to debug when a virtual field sql starts and ends
+        return [new Literal(`
+          /* start ${as}.${virtualColumnName} */
+            ${virtualColumnLiteral.val}
+          /* end ${as}.${virtualColumnName} */
+        `), virtualColumnName];
+      }
+
       // Object lookups will force any variable to strings, we don't want that for special objects etc
       if (typeof attr !== 'string') return attr;
       // Map attributes to aliased syntax attributes
@@ -597,8 +633,8 @@ function defaults(object, ...sources) {
         const value = object[key];
         if (
           value === undefined ||
-            _.eq(value, Object.prototype[key]) &&
-            !Object.prototype.hasOwnProperty.call(object, key)
+          _.eq(value, Object.prototype[key]) &&
+          !Object.prototype.hasOwnProperty.call(object, key)
 
         ) {
           object[key] = source[key];
