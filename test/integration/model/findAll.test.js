@@ -1533,6 +1533,21 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         });
       });
 
+      it('should be possible to define attributes at runtime', async function() {
+        await this.User.create();
+
+        const users = await this.User.findAll({
+          attributes: [[
+            Sequelize.literal('(SELECT IF(createdAt > NOW() - 7 * 24 * 60 * 60 * 1000, TRUE, FALSE) FROM Users AS U WHERE U.id = User.id)'),
+            'runtimeAttribute'
+          ]]
+        });
+
+        users.forEach(user => {
+          expect(user.runtimeAttribute).to.equal(1);
+        });
+      });
+
       it('should pull in dependent fields for a VIRTUAL', async function() {
         const User = this.sequelize.define('User', {
           active: {
