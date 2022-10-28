@@ -6393,11 +6393,6 @@ optionator@^0.9.1:
     type-check "^0.4.0"
     word-wrap "^1.2.3"
 
-oracledb@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/oracledb/-/oracledb-5.5.0.tgz#0cf9af5d0c0815f74849ae9ed56aee823514d71b"
-  integrity sha512-i5cPvMENpZP8nnqptB6l0pjiOyySj1IISkbM4Hr3yZEDdANo2eezarwZb9NQ8fTh5pRjmgpZdSyIbnn9N3AENw==
-
 ordered-read-streams@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ordered-read-streams/-/ordered-read-streams-1.0.1.tgz#77c0cb37c41525d64166d990ffad7ec6a0e1363e"
