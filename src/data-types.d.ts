@@ -514,19 +514,19 @@ export interface VirtualDataType<T extends AbstractDataTypeConstructor | Abstrac
 export const ENUM: EnumDataTypeConstructor;
 
 interface EnumDataTypeConstructor extends AbstractDataTypeConstructor {
-  new <T extends string>(...values: T[]): EnumDataType<T>;
+  new <T extends string>(...values: T[] | readonly T[]): EnumDataType<T>;
   new <T extends string>(options: EnumDataTypeOptions<T>): EnumDataType<T>;
-  <T extends string>(...values: T[]): EnumDataType<T>;
+  <T extends string>(...values: T[] | readonly T[]): EnumDataType<T>;
   <T extends string>(options: EnumDataTypeOptions<T>): EnumDataType<T>;
 }
 
 export interface EnumDataType<T extends string> extends AbstractDataType {
-  values: T[];
+  values: T[] | readonly T[];
   options: EnumDataTypeOptions<T>;
 }
 
 export interface EnumDataTypeOptions<T extends string> {
-  values: T[];
+  values: T[] | readonly T[];
 }
 
 /**
