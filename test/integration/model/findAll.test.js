@@ -26,8 +26,14 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       aBool: DataTypes.BOOLEAN,
       binary: DataTypes.STRING(16, true),
     });
+    this.Project = this.sequelize.define('Project', {
+      name: DataTypes.STRING,
+    });
 
-    await this.User.sync({ force: true });
+    this.User.hasMany(this.Project);
+    this.Project.belongsTo(this.User);
+
+    await this.sequelize.sync({ force: true });
   });
 
   describe('findAll', () => {
@@ -857,6 +863,12 @@ The following associations are defined on "Worker": "ToDos"`);
         beforeEach(async function () {
           const user = await this.User.create({ username: 'barfooz' });
           this.user = user;
+
+          const project = await this.Project.create({
+            name: 'Investigate',
+          });
+
+          await user.setProjects([project]);
         });
 
         it('should return a DAO when queryOptions are not set', async function () {
@@ -878,6 +890,24 @@ The following associations are defined on "Worker": "ToDos"`);
           for (const user of users) {
             expect(user).to.not.be.instanceOf(this.User);
             expect(users[0]).to.be.instanceOf(Object);
+          }
+        });
+
+        it('should return DAO data when json is not specified', async function () {
+          const users = await this.User.findAll({ where: { username: 'barfooz' }, include: [this.Project] });
+          for (const user of users) {
+            expect(user).to.be.instanceOf(this.User);
+            expect(user.Projects[0]).to.be.instanceOf(this.Project);
+          }
+        });
+
+        it.skip('should return json data when json is true', async function () {
+          const users = await this.User.findAll({ where: { username: 'barfooz' }, json: true, include: [this.Project] });
+          for (const user of users) {
+            expect(user).to.not.be.instanceOf(this.User);
+            expect(user).to.be.instanceOf(Object);
+            expect(user.Projects[0]).to.not.be.instanceOf(this.Project);
+            expect(user.Projects[0]).to.be.instanceOf(Object);
           }
         });
       });

@@ -254,6 +254,85 @@ export class MySqlQueryGenerator extends AbstractQueryGenerator {
     ]);
   }
 
+  _buildJsonObjectSql(tableName, attributes) {
+    return `json_object(${attributes.map(([_, alias]) => `'${alias}', (SELECT \`${tableName}\`.\`${alias}\` AS \`${alias}\`)`).join(', ')})`;
+  }
+
+  // returns an array of pair aliased attribute with alias. ie [['YEAR(`createdAt`)', 'creationYear']]
+  _getAttributesWithAliases(attributes, options, mainTable) {
+    const escapedAttributes = this.escapeAttributes(attributes, options, mainTable.as);
+
+    // replace does this 'YEAR(`createdAt`) AS `creationYear`' -> ['YEAR(`createdAt`)', 'creationYear']
+    return attributes.map((attr, i) => (typeof attr === 'string' ? [attr, attr] : escapedAttributes[i].replace(/(.*?) AS `(.*?)`/g, (_, b, c) => [b, c]).split(',')));
+  }
+
+  selectQuery(tableName, options, model) {
+
+    if (!options?.json === true) {
+      return super.selectQuery(tableName, options, model);
+    }
+
+    // TODO move up as constant
+    const rootSelectSql = 'SELECT coalesce(JSON_ARRAYAGG(`root`), json_array()) AS `root`';
+
+    const { where } = options;
+    let { attributes } = options;
+
+    if (Array.isArray(attributes[0]) && attributes[0][1] === 'count') {
+      return `SELECT count(*) AS \`count\` FROM \`${tableName}\`;`;
+    }
+
+    const mainTable = {
+      name: tableName,
+      quotedName: null,
+      as: null,
+      model,
+    };
+
+    super.resolveTableNameOptions(tableName, options, mainTable);
+    attributes = this._getAttributesWithAliases(attributes, options, mainTable);
+
+    let groupBySql = '';
+    if (options.group) {
+      options.group = super.normalizeGrouping(model, mainTable, options);
+      if (options.group) {
+        groupBySql = ` GROUP BY ${options.group}`;
+      }
+    }
+
+    let orderBySql = '';
+    if (options.order) {
+      const orders = super.getQueryOrders(options, model);
+      if (orders.mainQueryOrder.length > 0) {
+        orderBySql = ` ORDER BY ${orders.mainQueryOrder.join(', ')}`;
+      }
+    }
+
+    let havingSql = '';
+    if (options.having) {
+      const conditions = super.getWhereConditions(options.having, tableName, model, options, false);
+      if (conditions) {
+        havingSql = ` HAVING ${conditions}`;
+      }
+    }
+
+    return `
+      ${rootSelectSql}
+      FROM
+        (SELECT ${this._buildJsonObjectSql('_0_root.base', attributes)} AS \`root\`
+        FROM
+          (SELECT ${groupBySql ? attributes.map(([attr, alias]) => `${attr} AS \`${alias}\``).join(', ') : '*'}
+          FROM \`${tableName}\`
+          ${super.whereQuery(where)}
+          ${groupBySql}
+          ${havingSql}
+          ${orderBySql}
+          ${super.addLimitAndOffset(options, model)}
+          ) AS \`_0_root.base\`
+        ) AS \`_1_root\`;
+    `.replace(/\s\s+/g, ' ').trim();
+  }
+
   handleSequelizeMethod(smth, tableName, factory, options, prepend) {
     if (smth instanceof Utils.Json) {
       // Parse nested object
