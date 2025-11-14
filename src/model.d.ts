@@ -1093,14 +1093,13 @@ export interface TruncateOptions<TAttributes = any> extends Logging, Transaction
 
   /**
    * If set to true, destroy will SELECT all records matching the where parameter and will execute before /
-   * after destroy hooks on each row
+   * after destroy hooks on each row. Virtual columns are excluded from the preload query by default.
    */
   individualHooks?: boolean;
 
   /**
-   * When individualHooks is true, this controls whether virtual attributes are included in the preload query.
-   * By default, virtual columns are excluded from the preload to improve performance.
-   * Set to true to include virtual attributes in the instances passed to hooks.
+   * Run individual hooks with virtual columns included. This enables individual hooks and includes
+   * virtual attributes in the preload query (old behavior). Use this if hooks need access to virtual columns.
    *
    * @default false
    */
@@ -1141,14 +1140,13 @@ export interface RestoreOptions<TAttributes = any> extends Logging, Transactiona
 
   /**
    * If set to true, restore will find all records within the where parameter and will execute before / after
-   * bulkRestore hooks on each row
+   * bulkRestore hooks on each row. Virtual columns are excluded from the preload query by default.
    */
   individualHooks?: boolean;
 
   /**
-   * When individualHooks is true, this controls whether virtual attributes are included in the preload query.
-   * By default, virtual columns are excluded from the preload to improve performance.
-   * Set to true to include virtual attributes in the instances passed to hooks.
+   * Run individual hooks with virtual columns included. This enables individual hooks and includes
+   * virtual attributes in the preload query (old behavior). Use this if hooks need access to virtual columns.
    *
    * @default false
    */
@@ -1190,17 +1188,18 @@ export interface UpdateOptions<TAttributes = any> extends Logging, Transactionab
   sideEffects?: boolean;
 
   /**
-   * Run before / after update hooks?. If true, this will execute a SELECT followed by individual UPDATEs.
-   * A select is needed, because the row data needs to be passed to the hooks
+   * Run before / after update hooks? If true, this will execute a SELECT followed by individual UPDATEs.
+   * Virtual columns are excluded from the preload query by default for better performance.
+   * A select is needed because the row data needs to be passed to the hooks.
    *
    * @default false
    */
   individualHooks?: boolean;
 
   /**
-   * When individualHooks is true, this controls whether virtual attributes are included in the preload query.
-   * By default, virtual columns are excluded from the preload to improve performance.
-   * Set to true to include virtual attributes in the instances passed to hooks.
+   * Run individual hooks with virtual columns included. This enables individual hooks and includes
+   * virtual attributes in the preload query (old behavior). Use this if hooks need access to virtual columns.
+   * If you only need physical columns (most common), use individualHooks instead.
    *
    * @default false
    */
