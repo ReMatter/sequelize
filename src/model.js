@@ -3021,7 +3021,7 @@ class Model {
     }
     let instances;
     // Get daos and run beforeDestroy hook on each record individually
-    if (options.individualHooks) {
+    if (options.individualHooks || options.individualHooksWithVirtuals) {
       const findOptions = {
         where: options.where,
         transaction: options.transaction,
@@ -3029,7 +3029,7 @@ class Model {
         benchmark: options.benchmark
       };
 
-      // Filter out virtual columns unless explicitly opted in
+      // Filter out virtual columns UNLESS individualHooksWithVirtuals is explicitly true
       if (!options.individualHooksWithVirtuals && this._hasVirtualAttributes) {
         findOptions.attributes = Object.keys(this.tableAttributes);
       }
@@ -3106,7 +3106,7 @@ class Model {
 
     let instances;
     // Get daos and run beforeRestore hook on each record individually
-    if (options.individualHooks) {
+    if (options.individualHooks || options.individualHooksWithVirtuals) {
       const findOptions = {
         where: options.where,
         transaction: options.transaction,
@@ -3115,7 +3115,7 @@ class Model {
         paranoid: false
       };
 
-      // Filter out virtual columns unless explicitly opted in
+      // Filter out virtual columns UNLESS individualHooksWithVirtuals is explicitly true
       if (!options.individualHooksWithVirtuals && this._hasVirtualAttributes) {
         findOptions.attributes = Object.keys(this.tableAttributes);
       }
@@ -3243,7 +3243,7 @@ class Model {
     // Get instances and run beforeUpdate hook on each record individually
     let instances;
     let updateDoneRowByRow = false;
-    if (options.individualHooks) {
+    if (options.individualHooks || options.individualHooksWithVirtuals) {
       const findOptions = {
         where: options.where,
         transaction: options.transaction,
@@ -3252,7 +3252,7 @@ class Model {
         paranoid: options.paranoid
       };
 
-      // Filter out virtual columns unless explicitly opted in
+      // Filter out virtual columns UNLESS individualHooksWithVirtuals is explicitly true
       if (!options.individualHooksWithVirtuals && this._hasVirtualAttributes) {
         findOptions.attributes = Object.keys(this.tableAttributes);
       }
