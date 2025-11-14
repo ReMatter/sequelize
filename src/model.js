@@ -2976,6 +2976,7 @@ class Model {
    * @param  {object}       [options.where]                 Filter the destroy
    * @param  {boolean}      [options.hooks=true]            Run before / after bulk destroy hooks?
    * @param  {boolean}      [options.individualHooks=false] If set to true, destroy will SELECT all records matching the where parameter and will execute before / after destroy hooks on each row
+   * @param  {boolean}      [options.individualHooksWithVirtuals=false] When individualHooks is true, controls whether virtual attributes are included in the preload query. By default, virtual columns are excluded to improve performance. Set to true to include virtual attributes in instances passed to hooks.
    * @param  {number}       [options.limit]                 How many rows to delete
    * @param  {boolean}      [options.force=false]           Delete instead of setting deletedAt to current timestamp (only applicable if `paranoid` is enabled)
    * @param  {boolean}      [options.truncate=false]        If set to true, dialects that support it will use TRUNCATE instead of DELETE FROM. If a table is truncated the where and limit options are ignored
@@ -3021,7 +3022,19 @@ class Model {
     let instances;
     // Get daos and run beforeDestroy hook on each record individually
     if (options.individualHooks) {
-      instances = await this.findAll({ where: options.where, transaction: options.transaction, logging: options.logging, benchmark: options.benchmark });
+      const findOptions = {
+        where: options.where,
+        transaction: options.transaction,
+        logging: options.logging,
+        benchmark: options.benchmark
+      };
+
+      // Filter out virtual columns unless explicitly opted in
+      if (!options.individualHooksWithVirtuals && this._hasVirtualAttributes) {
+        findOptions.attributes = Object.keys(this.tableAttributes);
+      }
+
+      instances = await this.findAll(findOptions);
 
       await Promise.all(instances.map(instance => this.runHooks('beforeDestroy', instance, options)));
     }
@@ -3064,6 +3077,7 @@ class Model {
    * @param  {object}       [options.where]                 Filter the restore
    * @param  {boolean}      [options.hooks=true]            Run before / after bulk restore hooks?
    * @param  {boolean}      [options.individualHooks=false] If set to true, restore will find all records within the where parameter and will execute before / after bulkRestore hooks on each row
+   * @param  {boolean}      [options.individualHooksWithVirtuals=false] When individualHooks is true, controls whether virtual attributes are included in the preload query. By default, virtual columns are excluded to improve performance. Set to true to include virtual attributes in instances passed to hooks.
    * @param  {number}       [options.limit]                 How many rows to undelete (only for mysql)
    * @param  {Function}     [options.logging=false]         A function that gets executed while running the query to log the sql.
    * @param  {boolean}      [options.benchmark=false]       Pass query execution time in milliseconds as second argument to logging function (options.logging).
@@ -3093,7 +3107,20 @@ class Model {
     let instances;
     // Get daos and run beforeRestore hook on each record individually
     if (options.individualHooks) {
-      instances = await this.findAll({ where: options.where, transaction: options.transaction, logging: options.logging, benchmark: options.benchmark, paranoid: false });
+      const findOptions = {
+        where: options.where,
+        transaction: options.transaction,
+        logging: options.logging,
+        benchmark: options.benchmark,
+        paranoid: false
+      };
+
+      // Filter out virtual columns unless explicitly opted in
+      if (!options.individualHooksWithVirtuals && this._hasVirtualAttributes) {
+        findOptions.attributes = Object.keys(this.tableAttributes);
+      }
+
+      instances = await this.findAll(findOptions);
 
       await Promise.all(instances.map(instance => this.runHooks('beforeRestore', instance, options)));
     }
@@ -3131,6 +3158,7 @@ class Model {
    * @param  {boolean}        [options.hooks=true]            Run before / after bulk update hooks?
    * @param  {boolean}        [options.sideEffects=true]      Whether or not to update the side effects of any virtual setters.
    * @param  {boolean}        [options.individualHooks=false] Run before / after update hooks?. If true, this will execute a SELECT followed by individual UPDATEs. A select is needed, because the row data needs to be passed to the hooks
+   * @param  {boolean}        [options.individualHooksWithVirtuals=false] When individualHooks is true, controls whether virtual attributes are included in the preload query. By default, virtual columns are excluded to improve performance. Set to true to include virtual attributes in instances passed to hooks.
    * @param  {boolean|Array}  [options.returning=false]       If true, append RETURNING <model columns> to get back all defined values; if an array of column names, append RETURNING <columns> to get back specific columns (Postgres only)
    * @param  {number}         [options.limit]                 How many rows to update (only for mysql and mariadb, implemented as TOP(n) for MSSQL; for sqlite it is supported only when rowid is present)
    * @param  {Function}       [options.logging=false]         A function that gets executed while running the query to log the sql.
@@ -3216,13 +3244,20 @@ class Model {
     let instances;
     let updateDoneRowByRow = false;
     if (options.individualHooks) {
-      instances = await this.findAll({
+      const findOptions = {
         where: options.where,
         transaction: options.transaction,
         logging: options.logging,
         benchmark: options.benchmark,
         paranoid: options.paranoid
-      });
+      };
+
+      // Filter out virtual columns unless explicitly opted in
+      if (!options.individualHooksWithVirtuals && this._hasVirtualAttributes) {
+        findOptions.attributes = Object.keys(this.tableAttributes);
+      }
+
+      instances = await this.findAll(findOptions);
 
       if (instances.length) {
         // Run beforeUpdate hooks on each record and check whether beforeUpdate hook changes values uniformly

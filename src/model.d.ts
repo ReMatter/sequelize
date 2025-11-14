@@ -1098,6 +1098,15 @@ export interface TruncateOptions<TAttributes = any> extends Logging, Transaction
   individualHooks?: boolean;
 
   /**
+   * When individualHooks is true, this controls whether virtual attributes are included in the preload query.
+   * By default, virtual columns are excluded from the preload to improve performance.
+   * Set to true to include virtual attributes in the instances passed to hooks.
+   *
+   * @default false
+   */
+  individualHooksWithVirtuals?: boolean;
+
+  /**
    * How many rows to delete
    */
   limit?: number;
@@ -1135,6 +1144,15 @@ export interface RestoreOptions<TAttributes = any> extends Logging, Transactiona
    * bulkRestore hooks on each row
    */
   individualHooks?: boolean;
+
+  /**
+   * When individualHooks is true, this controls whether virtual attributes are included in the preload query.
+   * By default, virtual columns are excluded from the preload to improve performance.
+   * Set to true to include virtual attributes in the instances passed to hooks.
+   *
+   * @default false
+   */
+  individualHooksWithVirtuals?: boolean;
 
   /**
    * How many rows to undelete
@@ -1178,6 +1196,15 @@ export interface UpdateOptions<TAttributes = any> extends Logging, Transactionab
    * @default false
    */
   individualHooks?: boolean;
+
+  /**
+   * When individualHooks is true, this controls whether virtual attributes are included in the preload query.
+   * By default, virtual columns are excluded from the preload to improve performance.
+   * Set to true to include virtual attributes in the instances passed to hooks.
+   *
+   * @default false
+   */
+  individualHooksWithVirtuals?: boolean;
 
   /**
    * Return the affected rows (only for postgres)
